@@ -1,0 +1,1 @@
+run `docker-compose up` and the site should display at localhost:80
