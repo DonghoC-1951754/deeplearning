@@ -2,11 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Page 1</title>
+    <title>Tool Recogniser</title>
 </head>
 <body>
-<H1>This is our first page</H1>
-<p>You may add a picture of a cat here.</p>
-<img src="https://sadanduseless.b-cdn.net/wp-content/uploads/2019/06/cat-breading7.jpg">
+<H1>Upload picture here</H1>
+
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ imgForm.as_p }}
+    <input type="submit" value="Submit">
+</form>
+{% if results %}
+
+<table>
+{% for result in results %}
+    {% if forloop.first	 %}
+        <thead style="font-weight: bolder">
+            <tr>
+                <td>{{ result.tool }}</td>
+                <td>{{ result.confidence }}</td>
+            </tr>
+        </thead>
+    {% else %}
+    <tbody>
+        <tr>
+            <td>{{ result.tool }}</td>
+            <td>{{ result.confidence }}</td>
+        </tr>
+    </tbody>
+    {% endif %}
+{% endfor %}
+</table>
+{% endif %}
+
 </body>
 </html>
