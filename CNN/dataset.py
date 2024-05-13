@@ -316,3 +316,20 @@ def augment_rescale_images_in_main_directory(main_directory):
         if os.path.isdir(subfolder_path):
             rescale_images_in_folder(subfolder_path)
             augment_images_in_folder(subfolder_path)
+
+def check_corrupted_images_in_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        img_path = os.path.join(folder_path, filename)
+        img = cv2.imread(img_path)
+        if img is None:
+            print(f"Corrupted image found: {img_path}")
+            os.remove(img_path)
+            print(f"{img_path} deleted.")
+
+def check_corrupted_images_in_main_directory(main_directory):
+    # Loop over each subdirectory in the main directory
+    for subdir in os.listdir(main_directory):
+        subfolder_path = os.path.join(main_directory, subdir)
+        # Check if the item in the main directory is indeed a directory
+        if os.path.isdir(subfolder_path):
+            check_corrupted_images_in_folder(subfolder_path)
