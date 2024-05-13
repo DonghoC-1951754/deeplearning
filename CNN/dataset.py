@@ -1,11 +1,12 @@
-import mnist
-import cv2
-import os
-import zipfile
-import random
-import numpy as np
 import itertools
+import os
+import random
+import zipfile
 from enum import Enum
+
+import cv2
+import numpy as np
+from tqdm import tqdm
 
 
 class ToolType(Enum):
@@ -28,19 +29,21 @@ def load_single_image():
 
     return image
 
+
 def get_one_hammer_augmentation_list(image):
     return [
-            turn_180(image),
-            flip_image_horizontal(image),
-            flip_image_vertical(image),
-            blur_image(image),
-            add_noise(image),
-            change_color(image),
-            change_brightness(image, 0.3),
-            change_brightness(image, 2),
-            change_contrast(image),
-            change_saturation(image)
-        ]
+        turn_180(image),
+        flip_image_horizontal(image),
+        flip_image_vertical(image),
+        blur_image(image),
+        add_noise(image),
+        change_color(image),
+        change_brightness(image, 0.3),
+        change_brightness(image, 2),
+        change_contrast(image),
+        change_saturation(image)
+    ]
+
 
 def iterate_folders_in_zip(zip_file_path):
     folders = []
@@ -61,18 +64,16 @@ def show_image(image):
     cv2.destroyAllWindows()
 
 
-def scale_image(image):
+def scale_image(image, width=100, height=100):
     # Define the new size (width, height)
-    new_size = (100, 100)  # Adjust the size as needed
+    new_size = (width, height)  # Adjust the size as needed
     # Downscale the image
     return cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
 
 
 # -----------------Original Images-----------------#
 # Load data from the dataset.zip file, this only gives the standard images
-def load_data(test_percent=0.2, validate_percent=0):
-    dataset_dir = './dataset.zip'
-
+def load_data(dataset_dir='./dataset.zip', test_percent=0.2, validate_percent=0, scale: tuple = (100, 100)):
     # Lists to store images and labels for each set
     test_images, train_images, validate_images = [], [], []
     test_labels, train_labels, validate_labels = [], [], []
@@ -83,15 +84,19 @@ def load_data(test_percent=0.2, validate_percent=0):
         folder_images = []
 
         with zipfile.ZipFile(dataset_dir, 'r') as zip_ref:
-            for file_name in sorted(zip_ref.namelist()):
+            sorted_names = sorted(zip_ref.namelist())
+            for file_name in tqdm(sorted_names, "loading " + folder):
                 if os.path.dirname(file_name) == folder:
                     with zip_ref.open(file_name) as file:
                         image_data = file.read()
                         image_array = np.frombuffer(image_data, np.uint8)
-                        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-                        image = scale_image(image)  # You need to define the scale_image function
+                        try:
+                            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+                            image = scale_image(image, scale[0], scale[1])  # You need to define the scale_image function
 
-                        folder_images.append(image)
+                            folder_images.append(image)
+                        except:
+                            print("Error: Unable to load image at", file_name)
 
         random.shuffle(folder_images)
         total_images = len(folder_images)
@@ -145,6 +150,7 @@ def get_seperate_augmented_images(image):
         change_saturation(image)
     ]
     return augmented_images
+
 
 #Load data with augmented images where each image has 10 augmented versions so in total there is 11 images of each image to work with
 def load_data_augmented(test_percent=0.2, validate_percent=0):
@@ -208,7 +214,7 @@ def all_permutations_of_image(image):
                 result = flip_func(result)
                 result = bright_func(result)
                 skip = random.randint(0, 2)
-                for i in range(0,2):
+                for i in range(0, 2):
                     if i == skip:
                         continue
                     else:
@@ -219,6 +225,7 @@ def all_permutations_of_image(image):
                     all_images.append(result)
 
     return all_images
+
 
 #Load data with augmented images where each image has different permutations of the image of using multiple augmentations and different orders of augmentations at once
 def load_data_augmented_permutations(test_percent=0.2, validate_percent=0):
@@ -279,7 +286,6 @@ def change_saturation(image, scale=2.5):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype(np.float32)
     hsv[..., 1] *= scale
     return cv2.cvtColor(np.clip(hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
-
 
 # -----------------Alternative Implementation to loading-----------------
 

@@ -1,27 +1,29 @@
-# import tensorflow as tf
-import dataset
 import cnn
-# import mnist
-import matplotlib.pyplot as plt
-# from tensorflow.keras import datasets, layers, models
+# from CNN import dataset
+
 
 def main():
+    cnn.train_model_load('../Dataset real', batch_size=64, epochs=40)
+    # cnn.train_model_load('../data-medium', batch_size=64, epochs=40, #conv2d_filters=[64, 128, 256, 512],
+    #                      )
     # (train_images, train_labels), (test_images, test_labels) = datasets.cifar10.load_data()
-    train_images, test_images, validate_images, train_labels, test_labels, validate_labels = dataset.load_data_augmented_permutations()
-
+    # train_images, test_images, validate_images, train_labels, test_labels, validate_labels = dataset.load_data_augmented_permutations()
+    # train_images, test_images, validate_images, train_labels, test_labels, validate_labels = dataset.load_data('./dataset_real.zip',
+    #     drop_percent=.00, scale=(100, 100))
 
     #print amount of images in each dataset
-    print("Train images: ", len(train_images))
-    print("Test images: ", len(test_images))
-    print("Validate images: ", len(validate_images))
+    # print("Train images: ", len(train_images))
+    # print("Test images: ", len(test_images))
+    # print("Validate images: ", len(validate_images))
 
     #print amount of labels in each dataset
-    print("Train labels: ", len(train_labels))
-    print("Test labels: ", len(test_labels))
-    print("Validate labels: ", len(validate_labels))
-
-    cnn.train_model(train_images, train_labels, test_images, test_labels)
-    print("test")
+    # print("Train labels: ", len(train_labels))
+    # print("Test labels: ", len(test_labels))
+    # print("Validate labels: ", len(validate_labels))
+    #
+    # print("Image shape: ", np.array(train_images[0]).shape)
+    # cnn.train_model(train_images, train_labels, test_images, test_labels, epochs=10)
+    # print("test")
     # i=0
     # for item in test_labels:
     #     if item == 1:
@@ -33,4 +35,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
