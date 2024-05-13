@@ -64,7 +64,7 @@ def show_image(image):
     cv2.destroyAllWindows()
 
 
-def scale_image(image, width=100, height=100):
+def scale_image(image, width=256, height=256):
     # Define the new size (width, height)
     new_size = (width, height)  # Adjust the size as needed
     # Downscale the image
@@ -287,54 +287,32 @@ def change_saturation(image, scale=2.5):
     hsv[..., 1] *= scale
     return cv2.cvtColor(np.clip(hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
 
-# -----------------Alternative Implementation to loading-----------------
+# -----------------function to augment a file of images and to save it-----------------
 
-# def get_folder_names(zip_file_path):
-#     folders = set()
-#     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-#         for file_name in zip_ref.namelist():
-#             folder_name = os.path.dirname(file_name)
-#             if folder_name:
-#                 folders.add(folder_name)
-#     return list(folders)
-#
-# def read_image(zip_ref, file_name):
-#     with zip_ref.open(file_name) as file:
-#         image_data = file.read()
-#         image_array = np.frombuffer(image_data, np.uint8)
-#         return cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-#
-# def split_data(folder_images, test_percent, validate_percent):
-#     random.shuffle(folder_images)
-#     total_images = len(folder_images)
-#     test_index = int(total_images * test_percent)
-#     validate_index = int(total_images * (test_percent + validate_percent))
-#     return folder_images[:test_index], folder_images[test_index:validate_index], folder_images[validate_index:]
-#
-# def load_data(test_percent=0.2, validate_percent=0.1, dataset_dir='./dataset.zip'):
-#     test_images, train_images, validate_images = [], [], []
-#     test_labels, train_labels, validate_labels = [], [], []
-#
-#     folders = get_folder_names(dataset_dir)
-#
-#     with zipfile.ZipFile(dataset_dir, 'r') as zip_ref:
-#         for folder in folders:
-#             folder_images = []
-#             for file_name in sorted(zip_ref.namelist()):
-#                 if os.path.dirname(file_name) == folder:
-#                     image = read_image(zip_ref, file_name)
-#                     image = scale_image(image)  # You need to define the scale_image function
-#                     folder_images.append(image)
-#
-#             test, validate, train = split_data(folder_images, test_percent, validate_percent)
-#
-#             test_images.extend(test)
-#             test_labels.extend([ToolType[folder.upper()].value] * len(test))
-#
-#             validate_images.extend(validate)
-#             validate_labels.extend([ToolType[folder.upper()].value] * len(validate))
-#
-#             train_images.extend(train)
-#             train_labels.extend([ToolType[folder.upper()].value] * len(train))
-#
-#     return train_images, test_images, validate_images, train_labels, test_labels, validate_labels
+def augment_images_in_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        img_path = os.path.join(folder_path, filename)
+        img = cv2.imread(img_path)
+        if img is not None:
+            augmented_images = all_permutations_of_image(scale_image(img))
+            for i, augmented_img in enumerate(augmented_images):
+                output_filename = f"{os.path.splitext(filename)[0]}_aug_{i + 1}{os.path.splitext(filename)[1]}"
+                output_path = os.path.join(folder_path, output_filename)
+                cv2.imwrite(output_path, augmented_img)
+
+def rescale_images_in_folder(folder_path):
+    for filename in os.listdir(folder_path):
+        img_path = os.path.join(folder_path, filename)
+        img = cv2.imread(img_path)
+        if img is not None:
+            rescaled_img = scale_image(img)
+            cv2.imwrite(img_path, rescaled_img)
+
+def augment_rescale_images_in_main_directory(main_directory):
+    # Loop over each subdirectory in the main directory
+    for subdir in os.listdir(main_directory):
+        subfolder_path = os.path.join(main_directory, subdir)
+        # Check if the item in the main directory is indeed a directory
+        if os.path.isdir(subfolder_path):
+            rescale_images_in_folder(subfolder_path)
+            augment_images_in_folder(subfolder_path)

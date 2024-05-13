@@ -1,9 +1,14 @@
 import cnn
+import dataset
 # from CNN import dataset
 
 
 def main():
+    # ---Run this code below if you need to scale and augment a new dataset
+    # dataset.augment_rescale_images_in_main_directory("../Dataset")
+
     cnn.train_model_load('../Dataset real', batch_size=64, epochs=40)
+
     # cnn.train_model_load('../data-medium', batch_size=64, epochs=40, #conv2d_filters=[64, 128, 256, 512],
     #                      )
     # (train_images, train_labels), (test_images, test_labels) = datasets.cifar10.load_data()
