@@ -99,14 +99,29 @@ class EarlyStoppingAtMinLoss(tf.keras.callbacks.Callback):
             print("Epoch %05d: early stopping" % (self.stopped_epoch + 1))
 
 
-def train_model_load(dir, batch_size=128, epochs=20, conv2d_filters=[32, 64, 128], dense_units=128,
+def train_model_load(dir1, dir2='', batch_size=128, epochs=20, conv2d_filters=[32, 64, 128], dense_units=128,
                      shape: tuple = (256, 256, 3)):
     colormodes = {1: 'grayscale',
                   3: 'rgb'}
-    training_data, val_data = preprocessing.image_dataset_from_directory(dir, validation_split=0.2, subset='both',
+    training_data, val_data = preprocessing.image_dataset_from_directory(dir1, validation_split=0.2, subset='both',
                                                                          batch_size=batch_size, seed=1337,
                                                                          image_size=(shape[0], shape[1]),
                                                                          color_mode=colormodes[shape[2]])
+
+    if dir2:
+        training_data = tf.data.Dataset.sample_from_datasets(
+            [training_data, preprocessing.image_dataset_from_directory(dir2, validation_split=0.2, subset='training',
+                                                                       batch_size=batch_size, seed=1337,
+                                                                       image_size=(shape[0], shape[1]),
+                                                                       color_mode=colormodes[shape[2]])],
+            weights=[0.9, 0.1], stop_on_empty_dataset=True, rerandomize_each_iteration=True)
+        # val_data = tf.data.Dataset.sample_from_datasets(
+        #     [val_data, preprocessing.image_dataset_from_directory(dir2, validation_split=0.2, subset='validation',
+        #                                                           batch_size=batch_size, seed=1337,
+        #                                                           image_size=(shape[0], shape[1]),
+        #                                                           color_mode=colormodes[shape[2]])],
+        #     weights=[0.9, 0.1], stop_on_empty_dataset=True, rerandomize_each_iteration=True)
+
     model = models.Sequential([
         layers.InputLayer(shape),
         layers.Rescaling(1. / 255),

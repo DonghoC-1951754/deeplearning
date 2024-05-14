@@ -2,17 +2,18 @@ import cnn
 import dataset
 import tensorflow as tf
 
+
 # from CNN import dataset
 
 
 def main():
     # ---Run this code below if you need to scale and augment a new dataset---
-    # dataset.augment_rescale_images_in_main_directory("../Dataset")
+    # dataset.augment_rescale_images_in_main_directory("../real only")
     # ---Run this code below if you need to check for corrupted images in a directory---
     # dataset.check_corrupted_images_in_main_directory("../Dataset real")
 
-
-    cnn.train_model_load('../Dataset real', batch_size=64, epochs=40)
+    # cnn.train_model_load('../Dataset real', batch_size=64, epochs=40)
+    cnn.train_model_load('../Dataset synth', '../real only', batch_size=64, epochs=40)
 
     # cnn.train_model_load('../data-medium', batch_size=64, epochs=40, #conv2d_filters=[64, 128, 256, 512],
     #                      )

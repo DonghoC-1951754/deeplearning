@@ -1,40 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tool Recogniser</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block nav %}
+<a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="/index">Home</a>
+<a class="nav-link fw-bold py-1 px-0" href="/info">info</a>
+{% endblock %}
+
+{% block content %}
 <H1>Upload picture here</H1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ imgForm.as_p }}
+            <input type="submit" value="Submit">
+        </form>
+        {% if results %}
 
-
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ imgForm.as_p }}
-    <input type="submit" value="Submit">
-</form>
-{% if results %}
-
-<table>
-{% for result in results %}
-    {% if forloop.first	 %}
-        <thead style="font-weight: bolder">
+        <table>
+            {% for result in results %}
+            {% if forloop.first	 %}
+            <thead style="font-weight: bolder">
             <tr>
                 <td>{{ result.tool }}</td>
                 <td>{{ result.confidence }}</td>
             </tr>
-        </thead>
-    {% else %}
-    <tbody>
-        <tr>
-            <td>{{ result.tool }}</td>
-            <td>{{ result.confidence }}</td>
-        </tr>
-    </tbody>
-    {% endif %}
-{% endfor %}
-</table>
-{% endif %}
-
-</body>
-</html>
+            </thead>
+            {% else %}
+            <tbody>
+            <tr>
+                <td>{{ result.tool }}</td>
+                <td>{{ result.confidence }}</td>
+            </tr>
+            </tbody>
+            {% endif %}
+            {% endfor %}
+        </table>
+        {% endif %}
+{% endblock %}
